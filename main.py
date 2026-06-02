@@ -16,7 +16,6 @@ def main():
     st.title("📝 LinkedIn Post Generator")
     st.write("Generate LinkedIn posts using AI based on topic, length, and language.")
 
-    # Load few-shot tags safely
     try:
         fs = FewShotPosts()
         tags = fs.get_tags()
@@ -58,11 +57,14 @@ def main():
                 st.subheader("Generated LinkedIn Post")
                 st.write(post)
 
+            except ValueError as e:
+                st.error("API key missing.")
+                st.exception(e)
+
             except Exception as e:
                 st.error("Groq API connection failed.")
                 st.warning(
-                    "Please check your GROQ_API_KEY in Streamlit Secrets, "
-                    "model name, internet/API availability, and Python version."
+                    "Check Streamlit Secrets, Groq API key, model name, and Groq account status."
                 )
                 st.exception(e)
 
