@@ -5,13 +5,37 @@ from post_generator import generate_post
 length_options = ["Short", "Medium", "Long"]
 language_options = ["English", "Hinglish"]
 
+
 def main():
-    st.subheader("LinkedIn Post Generator")
+    st.set_page_config(
+        page_title="LinkedIn Post Generator",
+        page_icon="📝",
+        layout="centered"
+    )
+
+    st.title("📝 LinkedIn Post Generator")
+    st.write("Generate LinkedIn posts using AI based on topic, length, and language.")
+
+    # Load few-shot tags safely
+    try:
+        fs = FewShotPosts()
+        tags = fs.get_tags()
+
+        if not tags:
+            st.error("No tags found. Please check data/processed_posts.json file.")
+            return
+
+    except FileNotFoundError:
+        st.error("data/processed_posts.json file not found.")
+        st.info("Create a data folder and add processed_posts.json inside it.")
+        return
+
+    except Exception as e:
+        st.error("Error loading few-shot data.")
+        st.exception(e)
+        return
 
     col1, col2, col3 = st.columns(3)
-
-    fs = FewShotPosts()
-    tags = fs.get_tags()
 
     with col1:
         selected_tag = st.selectbox("Topic", options=tags)
@@ -22,9 +46,26 @@ def main():
     with col3:
         selected_language = st.selectbox("Language", options=language_options)
 
-    if st.button("Generate"):
-        post = generate_post(selected_length, selected_language, selected_tag)
-        st.write(post)
+    if st.button("Generate Post"):
+        with st.spinner("Generating LinkedIn post..."):
+            try:
+                post = generate_post(
+                    selected_length,
+                    selected_language,
+                    selected_tag
+                )
+
+                st.subheader("Generated LinkedIn Post")
+                st.write(post)
+
+            except Exception as e:
+                st.error("Groq API connection failed.")
+                st.warning(
+                    "Please check your GROQ_API_KEY in Streamlit Secrets, "
+                    "model name, internet/API availability, and Python version."
+                )
+                st.exception(e)
+
 
 if __name__ == "__main__":
     main()
