@@ -1,0 +1,20 @@
+[
+  {
+    "text": "Today I learned how AI can help professionals write better LinkedIn posts. Small automation tools can save time and improve productivity.",
+    "tags": ["AI", "LinkedIn", "Productivity"],
+    "length": "Short",
+    "language": "English"
+  },
+  {
+    "text": "Data Science is not only about building models. It is also about understanding the problem, cleaning the data, finding useful insights, and communicating the results clearly.",
+    "tags": ["Data Science", "Learning", "Career"],
+    "length": "Medium",
+    "language": "English"
+  },
+  {
+    "text": "Building projects is one of the best ways to learn programming. Every error teaches something new, and every deployment improves confidence.",
+    "tags": ["Projects", "Programming", "Learning"],
+    "length": "Short",
+    "language": "English"
+  }
+]
