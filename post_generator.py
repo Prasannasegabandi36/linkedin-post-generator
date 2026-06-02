@@ -1,5 +1,5 @@
-from llm_helper import llm
 from few_shot import FewShotPosts
+from llm_helper import get_llm_response
 
 few_shot = FewShotPosts()
 
@@ -7,46 +7,34 @@ few_shot = FewShotPosts()
 def get_length_str(length):
     if length == "Short":
         return "1 to 5 lines"
-    if length == "Medium":
+    elif length == "Medium":
         return "6 to 10 lines"
-    if length == "Long":
+    elif length == "Long":
         return "11 to 15 lines"
+    else:
+        return "6 to 10 lines"
 
 
 def generate_post(length, language, tag):
-    prompt = get_prompt(length, language, tag)
-    response = llm.invoke(prompt)
-    return response.content
+    prompt = f"""
+Generate a LinkedIn post using the below information.
 
+Topic: {tag}
+Length: {get_length_str(length)}
+Language: {language}
 
-def get_prompt(length, language, tag):
-    length_str = get_length_str(length)
-
-    prompt = f'''
-    Generate a LinkedIn post using the below information. No preamble.
-
-    1) Topic: {tag}
-    2) Length: {length_str}
-    3) Language: {language}
-    If Language is Hinglish then it means it is a mix of Hindi and English. 
-    The script for the generated post should always be English.
-    '''
-    # prompt = prompt.format(post_topic=tag, post_length=length_str, post_language=language)
+Rules:
+1. Write like a student/professional learning and building projects.
+2. Keep the tone simple, clear, and professional.
+3. Add useful hashtags at the end.
+4. Do not add extra explanations outside the post.
+"""
 
     examples = few_shot.get_filtered_posts(length, language, tag)
 
-    if len(examples) > 0:
-        prompt += "4) Use the writing style as per the following examples."
+    if examples:
+        prompt += "\n\nUse these examples only for writing style:\n"
+        for i, post in enumerate(examples[:2], start=1):
+            prompt += f"\nExample {i}:\n{post.get('text', '')}\n"
 
-    for i, post in enumerate(examples):
-        post_text = post['text']
-        prompt += f'\n\n Example {i+1}: \n\n {post_text}'
-
-        if i == 1: # Use max two samples
-            break
-
-    return prompt
-
-
-if __name__ == "__main__":
-    print(generate_post("Medium", "English", "Mental Health"))
+    return get_llm_response(prompt)
