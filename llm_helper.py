@@ -1,47 +1,38 @@
 import os
 import streamlit as st
-from groq import Groq
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
 
 load_dotenv()
 
 
 def get_groq_api_key():
+    """
+    First checks Streamlit secrets, then checks local .env file.
+    For Streamlit Cloud, add GROQ_API_KEY in app secrets.
+    For local, add GROQ_API_KEY in .env file.
+    """
     try:
-        api_key = st.secrets.get("GROQ_API_KEY")
+        if "GROQ_API_KEY" in st.secrets:
+            return st.secrets["GROQ_API_KEY"]
     except Exception:
-        api_key = None
+        pass
 
-    if not api_key:
-        api_key = os.getenv("GROQ_API_KEY")
-
-    return api_key
+    return os.getenv("GROQ_API_KEY")
 
 
-def get_llm_response(prompt):
+def get_llm():
     api_key = get_groq_api_key()
 
     if not api_key:
-        raise ValueError(
-            "GROQ_API_KEY is missing. Add it in Streamlit Secrets."
-        )
+        st.error("GROQ_API_KEY is missing. Add it in Streamlit Secrets or .env file.")
+        st.stop()
 
-    client = Groq(api_key=api_key)
-
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a helpful LinkedIn post writing assistant."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        temperature=0.7,
-        max_tokens=500
+    return ChatGroq(
+        groq_api_key=api_key,
+        model_name="llama-3.1-8b-instant",
+        temperature=0.7
     )
 
-    return response.choices[0].message.content
+
+llm = get_llm()
